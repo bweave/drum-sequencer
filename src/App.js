@@ -1,6 +1,6 @@
 import React from 'react'
 import './App.css'
-import Sequencer from "./Sequencer"
+import Sequencer from "./SequencerV2"
 import PlayButton from "./PlayButton"
 import Subdivision from "./Subdivision"
 import Tempo from "./Tempo"
@@ -73,10 +73,8 @@ export default class App extends React.Component {
   togglePlay() {
     this.setState({ isPlaying: !this.state.isPlaying }, function() {
       if (this.state.isPlaying) {
-        window.timerWorker.postMessage("start")
         this.sequencer.play(this.state)
       } else {
-        window.timerWorker.postMessage("stop")
         this.sequencer.stop()
       }
     })
