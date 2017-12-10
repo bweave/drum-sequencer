@@ -1,11 +1,11 @@
 import Sounds from "./Sounds"
 
 export default class Sequencer {
-  audio = new(window.AudioContext || window.webkitAudioContext)();
-  sounds = new Sounds(this.audio);
-  buffers = this.sounds.buffers;
-  altBuffers = this.sounds.altBuffers;
-  sources = [];
+  audio = new(window.AudioContext || window.webkitAudioContext)()
+  sounds = new Sounds(this.audio)
+  buffers = this.sounds.buffers
+  altBuffers = this.sounds.altBuffers
+  sources = []
 
   play(state) {
     const {

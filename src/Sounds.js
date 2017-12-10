@@ -5,11 +5,11 @@ export default class Sounds {
     hiHat: "https://s3.amazonaws.com/drum-samples/hihat.mp3",
     rackTom: "https://s3.amazonaws.com/drum-samples/rack-tom.mp3",
     floorTom: "https://s3.amazonaws.com/drum-samples/floor-tom.mp3",
-  };
+  }
 
   altSounds = {
     snareGhost: "https://s3.amazonaws.com/drum-samples/snare-ghost.mp3",
-  };
+  }
 
   constructor(audio) {
     this.audio = audio
@@ -17,8 +17,8 @@ export default class Sounds {
     this.loadSamples(this.altSounds, true)
   }
 
-  buffers = {};
-  altBuffers = {};
+  buffers = {}
+  altBuffers = {}
 
   loadSamples(sounds, isAlt = false) {
     const self = this
