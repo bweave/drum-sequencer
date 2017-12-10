@@ -73,10 +73,10 @@ export default class App extends React.Component {
   togglePlay() {
     this.setState({ isPlaying: !this.state.isPlaying }, function() {
       if (this.state.isPlaying) {
-        // timerWorker.postMessage("start")
+        window.timerWorker.postMessage("start")
         this.sequencer.play(this.state)
       } else {
-        // timerWorker.postMessage("stop")
+        window.timerWorker.postMessage("stop")
         this.sequencer.stop()
       }
     })

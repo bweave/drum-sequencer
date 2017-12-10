@@ -1,8 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import React from "react"
+import ReactDOM from "react-dom"
+import "./index.css"
+import App from "./App"
+import registerTimerWorker from "./registerTimerWorker"
 
 window.animationId = undefined
 const initialData = {
@@ -48,4 +48,4 @@ const initialData = {
 }
 
 ReactDOM.render(<App {...initialData} />, document.getElementById('root'));
-registerServiceWorker();
+registerTimerWorker()
