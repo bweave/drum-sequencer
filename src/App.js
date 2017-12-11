@@ -15,11 +15,22 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // TODO: this is a super simple implementation
-    // If we were playing, and are still playing, restart with the new state
-    if (prevState.isPlaying && this.state.isPlaying) {
-      this.sequencer.stop()
+    // from stopped to playing
+    if (!prevState.isPlaying && this.state.isPlaying) {
+      // start timer-worker and pass state to sequencer.play
+      this.sequencer.timerWorker.postMessage("start")
       this.sequencer.play(this.state)
+    }
+    // from playing to playing, maybe with new state
+    if (prevState.isPlaying && this.state.isPlaying) {
+      // pass state to sequencer.play, but don't change timer-worker
+      this.sequencer.play(this.state)
+    }
+    // from playing to stopped
+    if (prevState.isPlaying && !this.state.isPlaying) {
+      // tell timer-worker to stop, and release audio???
+      this.sequencer.timerWorker.postMessage("stop")
+      this.sequencer.stop()
     }
   }
 
@@ -71,13 +82,7 @@ export default class App extends React.Component {
   }
 
   togglePlay() {
-    this.setState({ isPlaying: !this.state.isPlaying }, function() {
-      if (this.state.isPlaying) {
-        this.sequencer.play(this.state)
-      } else {
-        this.sequencer.stop()
-      }
-    })
+    this.setState({ isPlaying: !this.state.isPlaying })
   }
 
   updateSubdivision(value) {

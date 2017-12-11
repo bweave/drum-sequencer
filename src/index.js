@@ -16,6 +16,16 @@ const initialData = {
   },
   subdivision: 16,
   tempo: 96,
+  // TODO: represent notes via beat.tick
+  // 1.2 === 2nd 8th note of beat 1
+  //         2nd 16th note of beat 1
+  //         2nd 32nd note of beat 1
+  //         2nd 8th note triplet of beat 1
+  //         2nd 16th note triplet of beat 1
+  // 1.4 === 4th 16th note of beat 1
+  //         4th 32nd note of beat 1
+  //         4th 16th note triplet of beat 1
+  // TODO: should probably write unit tests for these cases
   notes: {
     hiHat: {
       0: { volume: 2 },

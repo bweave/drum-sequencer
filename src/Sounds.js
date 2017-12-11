@@ -7,28 +7,21 @@ export default class Sounds {
     floorTom: "https://s3.amazonaws.com/drum-samples/floor-tom.mp3",
   }
 
-  altSounds = {
-    snareGhost: "https://s3.amazonaws.com/drum-samples/snare-ghost.mp3",
-  }
-
   constructor(audio) {
     this.audio = audio
     this.loadSamples(this.sounds)
-    this.loadSamples(this.altSounds, true)
   }
 
   buffers = {}
-  altBuffers = {}
 
-  loadSamples(sounds, isAlt = false) {
+  loadSamples(sounds) {
     const self = this
-    const bufferName = isAlt ? "altBuffers" : "buffers"
     for (const sound in sounds) {
       const req = new XMLHttpRequest()
       req.open('GET', sounds[sound], true)
       req.responseType = 'arraybuffer'
       req.onload = () => {
-        self.audio.decodeAudioData(req.response, buffer => self[bufferName][sound] = buffer)
+        self.audio.decodeAudioData(req.response, buffer => self.buffers[sound] = buffer)
       }
       req.send()
     }
