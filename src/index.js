@@ -3,50 +3,7 @@ import ReactDOM from "react-dom"
 import "./index.css"
 import App from "./App"
 
-// window.animationId = undefined
-// const initialData = {
-//   isPlaying: false,
-//   subdivisions: {
-//     "Quarter Notes": 4,
-//     "8th Notes": 8,
-//     "16th Notes": 16,
-//     "32nd Notes": 32,
-//     "8th Note Triplets": 12,
-//     "16th Note Triplets": 24,
-//   },
-//   subdivision: 16,
-//   tempo: 96,
-//   notes: {
-//     hiHat: {
-//       0: { volume: 2 },
-//       2: { volume: 1 },
-//       4: { volume: 2 },
-//       6: { volume: 1 },
-//       8: { volume: 2 },
-//       10: { volume: 1 },
-//       12: { volume: 2 },
-//       14: { volume: 1 },
-//     },
-//     rackTom: {},
-//     snare: {
-//       1: { volume: 1 },
-//       4: { volume: 2 },
-//       5: { volume: 1 },
-//       12: { volume: 2 },
-//     },
-//     floorTom: {},
-//     kick: {
-//       0: { volume: 2 },
-//       2: { volume: 2 },
-//       7: { volume: 1 },
-//       8: { volume: 2 },
-//       10: { volume: 2},
-//       15: { volume: 1 },
-//     }
-//   }
-// }
-
-const newData = {
+const initialData = {
   isPlaying: false,
   bars: 1,
   beatsPerBar: 4,
@@ -90,4 +47,4 @@ const newData = {
 // How to share
 // Represent the groove via URL Tab-style: http://example.com/?timeSignature=4/4&tempo=96&subdivision=16&hiHat=|X-x-X-x-X-x-X-x-|&snare=|----X--x-x--X---|&kick=|X-------X-X----x|
 
-ReactDOM.render(<App {...newData} />, document.getElementById('root'));
+ReactDOM.render(<App {...initialData} />, document.getElementById('root'));

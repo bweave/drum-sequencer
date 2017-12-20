@@ -1,6 +1,6 @@
 import React from 'react'
 import './App.css'
-import Sequencer from "./SequencerV2"
+import Sequencer from "./Sequencer"
 import PlayButton from "./PlayButton"
 import Subdivision from "./Subdivision"
 import Tempo from "./Tempo"
