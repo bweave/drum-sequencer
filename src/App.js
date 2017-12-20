@@ -5,16 +5,21 @@ import PlayButton from "./PlayButton"
 import Subdivision from "./Subdivision"
 import Tempo from "./Tempo"
 import Instrument from "./Instrument"
+import translateSubdivision from './translateSubdivision';
 
 export default class App extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.sequencer = new Sequencer()
-    this.state = {...this.props}
-  }
+  state = {...this.props}
+  sequencer = new Sequencer()
 
   componentDidUpdate(prevProps, prevState) {
+    if (prevState.subdivision !== this.state.subdivision) {
+      this.setState({ notes: translateSubdivision(
+        prevState.subdivision,
+        this.state.subdivision,
+        this.state.notes)
+      })
+    }
+
     // from stopped to playing
     if (!prevState.isPlaying && this.state.isPlaying) {
       // start timer-worker and pass state to sequencer.play
@@ -43,9 +48,6 @@ export default class App extends React.Component {
       notes,
     } = this.state
 
-    const possibleNotes = Array.from(Array(subdivision).keys())
-    const instruments = Object.keys(notes)
-
     return (
       <div className="wrapper">
         <div className="controls">
@@ -53,24 +55,24 @@ export default class App extends React.Component {
             isPlaying={isPlaying}
             togglePlay={this.togglePlay.bind(this)}
           />
+          <Tempo
+            tempo={tempo}
+            updateTempo={this.updateTempo.bind(this)}
+          />
           <Subdivision
             subdivisions={subdivisions}
             subdivision={subdivision}
             updateSubdivision={this.updateSubdivision.bind(this)}
           />
-          <Tempo
-            tempo={tempo}
-            updateTempo={this.updateTempo.bind(this)}
-          />
         </div>
 
         <div className="staff">
-          {instruments.map((instrument, i) => {
+          {Object.keys(notes).map(instrument => {
             return(
               <Instrument
-                key={`${instrument}-${i}`}
+                key={instrument}
                 name={instrument}
-                possibleNotes={possibleNotes}
+                subdivision={subdivision}
                 notes={notes[instrument]}
                 updateNotes={this.updateNotes.bind(this)}
               />
@@ -85,10 +87,8 @@ export default class App extends React.Component {
     this.setState({ isPlaying: !this.state.isPlaying })
   }
 
-  updateSubdivision(value) {
-    const { state:newState } = this
-    newState.subdivision = value
-    this.setState(newState)
+  updateSubdivision(subdivision) {
+    this.setState({ subdivision })
   }
 
   updateTempo(value) {
@@ -97,17 +97,17 @@ export default class App extends React.Component {
     this.setState(newState)
   }
 
-  updateNotes(instrument, value, volume) {
-    const { state:newState } = this
-    const newNotes = newState.notes[instrument]
-
-    if (volume === 0 && Object.keys(newNotes).includes(value)) {
-      delete newNotes[value]
-    } else {
-      newNotes[value] = { volume: volume }
+  updateNotes(instrument, timing, vol) {
+    const notes = Object.assign({}, this.state.notes)
+    const existingNoteIndex = notes[instrument].findIndex(note => note.timing === timing)
+    if (existingNoteIndex === -1) { // note is new so add it
+      notes[instrument].push({ timing, vol })
+    } else if (existingNoteIndex > -1 && vol === 0) { // note vol is 0 so remove it
+      notes[instrument].splice([existingNoteIndex], 1)
+    } else if (existingNoteIndex > -1 && vol > 0) { // set note vol to new vol
+      notes[instrument][existingNoteIndex].vol = vol
     }
-    newState.notes[instrument] = newNotes
-
+    const newState = Object.assign({}, this.state, { notes })
     this.setState(newState)
   }
 }

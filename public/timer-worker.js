@@ -3,26 +3,17 @@ let interval = 100
 
 self.onmessage = (e) => {
   if (e.data.interval) {
-    console.log("setting interval")
     interval = e.data.interval
     console.log(`interval: ${interval}`)
     if (timerID) {
       clearInterval(timerID)
       timerID = setInterval(() => postMessage("tick"), interval)
     }
-  }
-  switch(e.data) {
-    case "start":
-      console.log("starting")
+  } else if (e.data === "start") {
       timerID = setInterval(() => postMessage("tick"), interval)
-      break
-    case "stop":
-      console.log("stopping")
+  } else if (e.data === "stop") {
       clearInterval(timerID)
       timerID=null
-      break
-    default:
-      break
   }
 }
 postMessage("hi there from timer-worker")

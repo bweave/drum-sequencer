@@ -8,7 +8,7 @@ export default class Subdivision extends React.Component {
     } = this.props
 
     return(
-      <div className="control subdivision">
+      <div className="control subdivisions">
         <label htmlFor="subdivision">Subdivision</label>
         <select
           name="subdivision"

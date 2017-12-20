@@ -1,17 +1,19 @@
 import Sounds from "./Sounds"
 
 export default class Sequencer {
+  audio = new(window.AudioContext || window.webkitAudioContext)()
+  sounds = new Sounds(this.audio)
+  buffers = this.sounds.buffers
+  sources = []
+  notesInQueue = []
+  currentTiming = "1.1.1"
+  nextNoteTime = 0.0
+  lookAhead = 0.1 // seconds
+  timerWorker = new Worker(`${process.env.PUBLIC_URL}/timer-worker.js`)
+
   constructor() {
-    this.audio = new(window.AudioContext || window.webkitAudioContext)()
-    this.sounds = new Sounds(this.audio)
-    this.buffers = this.sounds.buffers
-    this.notesInQueue = []
-    this.currentTick = 0
-    this.nextNoteTime = 0.0
-    this.lookAhead = 0.1 // seconds
-    this.timerWorker = new Worker(`${process.env.PUBLIC_URL}/timer-worker.js`)
     this.timerWorker.onmessage = this.handleTimerMessage
-    this.timerWorker.postMessage({interval: 25.0})
+    this.audio.suspend()
   }
 
   handleTimerMessage = (e) => {
@@ -26,11 +28,16 @@ export default class Sequencer {
     this.tempo = state.tempo
     this.subdivision = state.subdivision
     this.notes = state.notes
+    if (this.audio.state === "suspended") {
+      this.audio.resume()
+    }
   }
 
   stop() {
-    // TODO: kill all audio sources???
-    this.currentTick = 0
+    this.audio.suspend()
+    this.nextNoteTime = this.audio.currentTime
+    this.currentTiming = "1.1.1"
+    this.sources.forEach(source => source.stop())
   }
 
   schedule() {
@@ -43,46 +50,40 @@ export default class Sequencer {
   }
 
   scheduleNotes() {
-    // push the note on the queue, even if we're not playing.
-    // this is really only needed for visuals
-    // this.notesInQueue.push({ note: beatNumber, time: time })
-
-    // create sources via buffers for currentTick
-    console.log(`scheduling notes for ${this.currentTick}`)
-
-    const { audio, notes, buffers } = this
-    const currentTick = this.currentTick.toString()
-    const instruments = Object.keys(buffers)
+    const instruments = Object.keys(this.buffers)
     instruments.forEach(instrument => {
-      const instrumentNotes = Object.keys(notes[instrument])
-      if (instrumentNotes.includes(currentTick)) {
-        const note = notes[instrument][currentTick]
-        const volume = note.volume / 3.0
-        const source = audio.createBufferSource()
-        const gainNode = audio.createGain()
-        gainNode.gain.value = volume
-        gainNode.connect(audio.destination)
-        source.buffer = buffers[instrument]
-        source.connect(gainNode)
-        source.start(this.nextNoteTime)
-        console.log(`gonna play ${instrument} @ ${currentTick} : ${this.nextNoteTime}`)
-      }
-    })
+      this.notes[instrument]
+        .filter(note => note.timing === this.currentTiming)
+        .forEach(note => this.createSound(instrument, note), this)
+    }, this)
+  }
+
+  createSound(instrument, note) {
+    const vol = note.vol/ 3.0
+    const source = this.audio.createBufferSource()
+    const gainNode = this.audio.createGain()
+    gainNode.gain.setTargetAtTime(vol, this.nextNoteTime, 0)
+    gainNode.connect(this.audio.destination)
+    source.buffer = this.buffers[instrument]
+    source.connect(gainNode)
+    source.start(this.nextNoteTime)
+    this.sources.push(source)
   }
 
   nextTick() {
     // Advance current note and time
     // Notice this picks up the CURRENT tempo value to calculate beat length.
-    let secondsPerBeat = 60.0 / this.tempo
+    const secondsPerBeat = 60.0 / this.tempo //=> 60 / 120 = 0.5
+    const ticksPerBeat = this.subdivision / 4 //=> ticksPerBeat: e.g. 8 / 4 = 2
+    this.nextNoteTime += 1 / ticksPerBeat * secondsPerBeat //=> 1/2 * 0.5 = 0.25 seconds
 
-    // Add beat length to last beat
-    this.nextNoteTime += (1/(this.subdivision / 4)) * secondsPerBeat
-
-    // Advance the beat number, wrap to zero
-    this.currentTick++
-    if (this.currentTick === this.subdivision) {
-      this.currentTick = 0
-    }
-    console.log(`currentTick advanced to: ${this.currentTick}`)
+    const maxTick = this.subdivision / 4
+    this.currentTiming = this.currentTiming.replace(/^(\d).(\d).(\d)$/, (_, bar, beat, tick) => {
+      tick = (tick < maxTick) ? parseInt(tick, 10) + 1 : 1
+      if (tick === 1) {
+        beat = (beat < 4) ? parseInt(beat, 10) + 1 : 1
+      }
+      return `${bar}.${beat}.${tick}`
+    })
   }
 }
