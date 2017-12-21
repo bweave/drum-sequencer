@@ -1,3 +1,4 @@
+import Clipboard from "clipboard"
 import React from "react"
 import ReactDOM from "react-dom"
 import "./index.css"
@@ -29,7 +30,5 @@ const initialData = {
   grooves: { saved: [], presets: [] },
 }
 
-// How to share
-// Represent the groove via URL Tab-style: http://example.com/?timeSignature=4/4&tempo=96&subdivision=16&hiHat=|X-x-X-x-X-x-X-x-|&snare=|----X--x-x--X---|&kick=|X-------X-X----x|
-
 ReactDOM.render(<App {...initialData} />, document.getElementById('root'));
+new Clipboard(".copy-share-link")

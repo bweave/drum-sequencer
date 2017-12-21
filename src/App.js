@@ -9,7 +9,9 @@ import Tempo from "./Tempo"
 import presets from "./presets"
 import Grooves from "./Grooves"
 import SaveButton from "./SaveButton"
+import ShareButton from "./ShareButton"
 import Instrument from "./Instrument"
+import ShareLink from "./ShareLink"
 import translateSubdivision from './translateSubdivision';
 
 export default class App extends React.Component {
@@ -17,8 +19,11 @@ export default class App extends React.Component {
   sequencer = new Sequencer()
 
   componentWillMount() {
-    this.ensurePresetsAreAvailable()
-      .then(resp => this.fetchSavedGrooves())
+    this.ensurePresetsAreAvailable().then(resp => {
+      this.fetchSavedGrooves().then(() => {
+        this.decodeSharedLink()
+      })
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -76,6 +81,7 @@ export default class App extends React.Component {
           />
           <Grooves grooves={grooves} load={this.load.bind(this)} />
           <SaveButton name={this.state.name} save={this.save.bind(this)} />
+          <ShareButton share={this.share.bind(this)} />
         </div>
 
         <div className="staff">
@@ -91,6 +97,9 @@ export default class App extends React.Component {
             )}
            )}
         </div>
+        {this.state.shareLink &&
+          <ShareLink link={this.state.shareLink} hide={this.hideShareLink.bind(this)} />
+        }
       </div>
     )
   }
@@ -104,7 +113,7 @@ export default class App extends React.Component {
 
   fetchSavedGrooves() {
     const grooves = Object.assign({}, this.state.grooves)
-    localforage.keys().then(storedKeys => {
+    return localforage.keys().then(storedKeys => {
       const keysToFetch = storedKeys.filter(storedKey => {
         return !(
           grooves.saved.map(groove => groove.key).concat(
@@ -182,5 +191,31 @@ export default class App extends React.Component {
         this.setState(newState)
       })
       .catch(err => console.log(err))
+  }
+
+  share() {
+    const { name = "Untitled", tempo, subdivision, bars, beatsPerBar, beat, notes } = this.state
+    // TODO: would it be worth making this link prettier?
+    const shareLink = `${window.location.href}?name=${encodeURIComponent(name)}&tempo=${tempo}&subdivision=${subdivision}&bars=${bars}&beatsPerBar=${beatsPerBar}&beat=${beat}&notes=${encodeURIComponent(JSON.stringify(notes))}`
+
+    this.setState({ shareLink })
+  }
+
+  decodeSharedLink() {
+    const params = new URLSearchParams(window.location.search)
+    if (Array.from(params).length < 1) return
+    this.setState({
+      name: params.get("name"),
+      tempo: _.parseInt(params.get("tempo")),
+      subdivision: _.parseInt(params.get("subdivision")),
+      bars: _.parseInt(params.get("bars")),
+      beatsPerBar: _.parseInt(params.get("beatsPerBar")),
+      beat: _.parseInt(params.get("beat")),
+      notes: JSON.parse(decodeURIComponent(params.get("notes"))),
+    })
+  }
+
+  hideShareLink() {
+    setTimeout(() => this.setState({ shareLink: undefined }), 500)
   }
 }
