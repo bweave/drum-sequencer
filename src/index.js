@@ -20,28 +20,13 @@ const initialData = {
   },
   subdivision: 8,
   notes: {
-    hiHat: [
-      { timing: "1.1.1", vol: 2 },
-      { timing: "1.1.2", vol: 2 },
-      { timing: "1.2.1", vol: 2 },
-      { timing: "1.2.2", vol: 2 },
-      { timing: "1.3.1", vol: 2 },
-      { timing: "1.3.2", vol: 2 },
-      { timing: "1.4.1", vol: 2 },
-      { timing: "1.4.2", vol: 2 },
-    ],
+    hiHat: [],
     rackTom: [],
-    snare: [
-      { timing: "1.2.1", vol: 2 },
-      { timing: "1.4.1", vol: 2 },
-    ],
+    snare: [],
     floorTom: [],
-    kick: [
-      { timing: "1.1.1", vol: 2 },
-      { timing: "1.3.1", vol: 2 },
-      { timing: "1.3.2", vol: 2 },
-    ],
+    kick: [],
   },
+  grooves: { saved: [], presets: [] },
 }
 
 // How to share

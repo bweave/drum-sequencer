@@ -59,7 +59,7 @@ export default class Sequencer {
   }
 
   createSound(instrument, note) {
-    const vol = note.vol/ 3.0
+    const vol = this.calculateVol(note.vol)
     const source = this.audio.createBufferSource()
     const gainNode = this.audio.createGain()
     gainNode.gain.setTargetAtTime(vol, this.nextNoteTime, 0)
@@ -68,6 +68,21 @@ export default class Sequencer {
     source.connect(gainNode)
     source.start(this.nextNoteTime)
     this.sources.push(source)
+  }
+
+  calculateVol(vol) {
+    switch(vol) {
+      case 2:
+        vol = 1
+        break
+      case 1:
+        vol = 0.2
+        break
+      default:
+        vol = 0
+        break
+    }
+    return vol
   }
 
   nextTick() {

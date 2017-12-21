@@ -1,9 +1,14 @@
+import _ from "lodash"
+import localforage from "localforage"
 import React from 'react'
 import './App.css'
 import Sequencer from "./Sequencer"
 import PlayButton from "./PlayButton"
 import Subdivision from "./Subdivision"
 import Tempo from "./Tempo"
+import presets from "./presets"
+import Grooves from "./Grooves"
+import SaveButton from "./SaveButton"
 import Instrument from "./Instrument"
 import translateSubdivision from './translateSubdivision';
 
@@ -11,7 +16,17 @@ export default class App extends React.Component {
   state = {...this.props}
   sequencer = new Sequencer()
 
+  componentWillMount() {
+    this.ensurePresetsAreAvailable()
+      .then(resp => this.fetchSavedGrooves())
+  }
+
   componentDidUpdate(prevProps, prevState) {
+    if (prevState.name !== this.state.name) {
+      this.fetchSavedGrooves()
+      return
+    }
+
     if (prevState.subdivision !== this.state.subdivision) {
       this.setState({ notes: translateSubdivision(
         prevState.subdivision,
@@ -40,16 +55,11 @@ export default class App extends React.Component {
   }
 
   render() {
-    const {
-      isPlaying,
-      subdivisions,
-      subdivision,
-      tempo,
-      notes,
-    } = this.state
+    const { isPlaying, subdivisions, subdivision, tempo, notes, grooves } = this.state
 
     return (
       <div className="wrapper">
+        <h1 className="title">{this.state.name || "Untitled"}</h1>
         <div className="controls">
           <PlayButton
             isPlaying={isPlaying}
@@ -64,6 +74,8 @@ export default class App extends React.Component {
             subdivision={subdivision}
             updateSubdivision={this.updateSubdivision.bind(this)}
           />
+          <Grooves grooves={grooves} load={this.load.bind(this)} />
+          <SaveButton name={this.state.name} save={this.save.bind(this)} />
         </div>
 
         <div className="staff">
@@ -81,6 +93,37 @@ export default class App extends React.Component {
         </div>
       </div>
     )
+  }
+
+  ensurePresetsAreAvailable() {
+    return Promise.all(Object.keys(presets).map(key => {
+      const storageKey = `drum_sequencer_preset_${key}`
+      return localforage.setItem(storageKey, { key: storageKey, ...presets[key]})
+    })).then(resp => resp)
+  }
+
+  fetchSavedGrooves() {
+    const grooves = Object.assign({}, this.state.grooves)
+    localforage.keys().then(storedKeys => {
+      const keysToFetch = storedKeys.filter(storedKey => {
+        return !(
+          grooves.saved.map(groove => groove.key).concat(
+          grooves.presets.map(groove => groove.key)
+        )).includes(storedKey)
+      })
+      Promise.all(keysToFetch.map(key => {
+        return localforage.getItem(key)
+      })).then(fetchedGrooves => {
+        fetchedGrooves.forEach(groove => {
+          if (groove.key.includes("drum_sequencer_preset_")) {
+            grooves.presets.push({key: groove.key, name: groove.name})
+          } else if (groove.key.includes("drum_sequencer_")) {
+            grooves.saved.push({ key: groove.key, name: groove.name })
+          }
+        })
+        this.setState({ grooves })
+      })
+    })
   }
 
   togglePlay() {
@@ -109,5 +152,35 @@ export default class App extends React.Component {
     }
     const newState = Object.assign({}, this.state, { notes })
     this.setState(newState)
+  }
+
+  save(name) {
+    this.togglePlay()
+    const storageKey = _.escape(_.trim(_.snakeCase(`drum_sequencer_${name}`)))
+    const { tempo, subdivision, bars, beatsPerBar, beat, notes } = this.state
+    localforage
+      .setItem(storageKey, {
+        key: storageKey,
+        name,
+        tempo,
+        subdivision,
+        bars,
+        beatsPerBar,
+        beat,
+        notes
+      })
+      .then(resp => this.setState({ name: resp.name }))
+      .catch(err => console.log(err))
+  }
+
+  load(key) {
+    localforage
+      .getItem(key)
+      .then(resp => {
+        if (!resp) return
+        const newState = Object.assign({}, resp, {key: undefined})
+        this.setState(newState)
+      })
+      .catch(err => console.log(err))
   }
 }
