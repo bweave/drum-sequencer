@@ -70,6 +70,9 @@ export default class App extends React.Component {
             isPlaying={isPlaying}
             togglePlay={this.togglePlay.bind(this)}
           />
+          <ShareButton share={this.share.bind(this)} />
+          <SaveButton name={this.state.name} save={this.save.bind(this)} />
+          <Grooves grooves={grooves} load={this.load.bind(this)} />
           <Tempo
             tempo={tempo}
             updateTempo={this.updateTempo.bind(this)}
@@ -79,9 +82,6 @@ export default class App extends React.Component {
             subdivision={subdivision}
             updateSubdivision={this.updateSubdivision.bind(this)}
           />
-          <Grooves grooves={grooves} load={this.load.bind(this)} />
-          <SaveButton name={this.state.name} save={this.save.bind(this)} />
-          <ShareButton share={this.share.bind(this)} />
         </div>
 
         <div className="staff">

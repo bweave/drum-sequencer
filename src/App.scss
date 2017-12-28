@@ -12,16 +12,30 @@
 .controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 
   .control {
     display: flex;
-    align-items: center;
-    margin-right: 1rem;
+    align-items: flex-end;
   }
 
   label { margin-right: 1rem }
-  select { min-width: 4rem }
+  select {
+    margin: 0;
+    padding: 7px 8px;
+    border-radius: 3px;
+    color: #444;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  button {
+    margin: 0;
+    padding: 7px 8px;
+    border-radius: 3px;
+    color: #444;
+    font-size: 0.9rem;
+  }
 }
 
 .staff {

@@ -7,7 +7,7 @@ export default class Grooves extends React.Component {
       <div className="control load">
         <label htmlFor="load">Grooves</label>
         <select name="load" onChange={this.handleChange}>
-          <option value=""></option>
+          <option value="">Choose...</option>
           <optgroup label="Saved Grooves">
             {grooves.saved.length &&
               grooves.saved.map(groove => {
@@ -28,6 +28,6 @@ export default class Grooves extends React.Component {
   }
 
   handleChange = (e) => {
-    this.props.load(e.target.value)
+    if (e.target.value) this.props.load(e.target.value)
   }
 }
