@@ -3,7 +3,7 @@ import Sounds from "./Sounds"
 export default class Sequencer {
   audio = new(window.AudioContext || window.webkitAudioContext)()
   sounds = new Sounds(this.audio)
-  buffers = this.sounds.buffers
+  // buffers = this.sounds.buffers
   sources = []
   notesInQueue = []
   currentTiming = "1.1.1"
@@ -50,7 +50,10 @@ export default class Sequencer {
   }
 
   scheduleNotes() {
-    const instruments = Object.keys(this.buffers)
+    // const instruments = Object.keys(this.buffers)
+    // TODO: need to account for ride and crash in a cleaner way
+    // b/c right now notes and sounds are tightly coupled.
+    const instruments = Object.keys(this.sounds.instruments)
     instruments.forEach(instrument => {
       this.notes[instrument]
         .filter(note => note.timing === this.currentTiming)
@@ -59,15 +62,26 @@ export default class Sequencer {
   }
 
   createSound(instrument, note) {
+    const offset = this.sounds.instruments[instrument].offset
+    const duration = this.sounds.instruments[instrument].duration
     const vol = this.calculateVol(note.vol)
+    const source = this.createSource(vol)
+    source.start(this.nextNoteTime, offset, duration)
+    this.sources.push(source)
+  }
+
+  createSource(vol) {
     const source = this.audio.createBufferSource()
+    source.buffer = this.sounds.buffer
+    source.connect(this.createGain(vol))
+    return source
+  }
+
+  createGain(vol) {
     const gainNode = this.audio.createGain()
     gainNode.gain.setTargetAtTime(vol, this.nextNoteTime, 0)
     gainNode.connect(this.audio.destination)
-    source.buffer = this.buffers[instrument]
-    source.connect(gainNode)
-    source.start(this.nextNoteTime)
-    this.sources.push(source)
+    return gainNode
   }
 
   calculateVol(vol) {

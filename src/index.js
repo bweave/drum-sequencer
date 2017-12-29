@@ -21,6 +21,8 @@ const initialData = {
   },
   subdivision: 8,
   notes: {
+    // crash: [],
+    // ride: [],
     hiHat: [],
     rackTom: [],
     snare: [],

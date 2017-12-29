@@ -1,29 +1,22 @@
 export default class Sounds {
-  sounds = {
-    kick: "https://s3.amazonaws.com/drum-samples/kick.mp3",
-    snare: "https://s3.amazonaws.com/drum-samples/snare.mp3",
-    hiHat: "https://s3.amazonaws.com/drum-samples/hihat.mp3",
-    rackTom: "https://s3.amazonaws.com/drum-samples/rack-tom.mp3",
-    floorTom: "https://s3.amazonaws.com/drum-samples/floor-tom.mp3",
+  instruments = {
+    kick: { offset: 0.06, duration: 0.515 },
+    snare: { offset: 0.618, duration: 0.543 },
+    rackTom: { offset: 1.228, duration: 1.47 },
+    floorTom: { offset: 2.8, duration: 2.351 },
+    hiHat: { offset: 11.579, duration: 0.174 },
+    // ride: { offset: 5.194, duration: 3.751 },
+    // crash: { offset: 9.012, duration: 2.454 },
   }
 
   constructor(audio) {
-    this.audio = audio
-    this.loadSamples(this.sounds)
-  }
-
-  buffers = {}
-
-  loadSamples(sounds) {
     const self = this
-    for (const sound in sounds) {
-      const req = new XMLHttpRequest()
-      req.open('GET', sounds[sound], true)
-      req.responseType = 'arraybuffer'
-      req.onload = () => {
-        self.audio.decodeAudioData(req.response, buffer => self.buffers[sound] = buffer)
-      }
-      req.send()
+    const req = new XMLHttpRequest()
+    req.open('GET', "https://s3.amazonaws.com/drum-samples/drum-sprite.mp3", true)
+    req.responseType = 'arraybuffer'
+    req.onload = () => {
+      audio.decodeAudioData(req.response, buffer => self.buffer = buffer)
     }
+    req.send()
   }
 }
